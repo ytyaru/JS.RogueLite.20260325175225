@@ -7,7 +7,8 @@ class FinishedSceneElement extends SceneElement {
     }
     #make() {
         this.appendChild(Dom.tags.h1('Game over'));
-        this.appendChild(Dom.tags.button({onclick:(e)=>this._.onNext()}, '再開'));
+        //this.appendChild(Dom.tags.button({onclick:(e)=>this._.onNext()}, '再開'));
+        this.appendChild(Dom.tags.button({listeners:{click:(e)=>this._.onNext()}}, '再開'));
     }
 }
 customElements.define('finished-scene-element', FinishedSceneElement);
