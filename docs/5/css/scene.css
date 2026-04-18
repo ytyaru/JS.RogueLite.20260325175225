@@ -11,4 +11,3 @@
   pointer-events: none; /* クリックや選択を無効化して下の層へ通す */
   user-select: none;    /* テキスト選択も無効化 */
 }
-

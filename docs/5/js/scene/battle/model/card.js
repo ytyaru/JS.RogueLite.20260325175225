@@ -37,8 +37,7 @@ const CARD_LIST = [
         { type: Effects.DAMAGE_ACTOR, value: 1 }
     ]),
     new Card('HEAL', '薬', [{ type: Effects.HEAL_ACTOR, value: 5 }]),
-    //new Card('AUTO_HEAL', 'リジェネ', [{ type: Effects.HEAL_ACTOR, value: 1 }], true)
-    new Card('AUTO_HEAL', '自然治癒', [{ type: Effects.HEAL_ACTOR, value: 1 }], true)
+    new Card('AUTO_HEAL', 'リジェネ', [{ type: Effects.HEAL_ACTOR, value: 1 }], true)
 ];
 /*
 class Card {
