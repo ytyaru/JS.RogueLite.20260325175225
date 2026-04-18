@@ -1,0 +1,13 @@
+.scene {
+  position: absolute; /* 重ね合わせることで空白領域を作らない */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.is-hidden {
+  content-visibility: hidden; /* レンダリングをスキップして高速化 */
+  contain-intrinsic-size: 100vh; 
+  pointer-events: none; /* クリックや選択を無効化して下の層へ通す */
+  user-select: none;    /* テキスト選択も無効化 */
+}
