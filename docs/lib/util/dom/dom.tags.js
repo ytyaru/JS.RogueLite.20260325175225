@@ -7,7 +7,16 @@ const formatListeners = (listeners)=>{
 };
 const tag = (ns, name, ...args) => {
     const [{is, ...props}, ...children] = 0<args.length && 'object'===typeof args[0] && '[object Object]'===Object.prototype.toString.call(args[0]) ? args : [{}, ...args];
-    const dom = ns ? document.createElementNS(ns, name, {is}) : document.createElement(name, {is})
+    // Uncaught DOMException: Operation is not supported
+     const dom = ns ? document.createElementNS(ns, name, {is}) : document.createElement(name, {is})
+//    const isO = is ? ({is}) : undefined;
+//    const dom = ns ? document.createElementNS(ns, name, isO) : document.createElement(name, isO);
+    /*
+    const options = (typeof is === 'string' && is.length > 0) ? {is} : undefined;
+    const dom = ns 
+        ? (options ? document.createElementNS(ns, name, options) : document.createElementNS(ns, name))
+        : (options ? document.createElement(name, options) : document.createElement(name));
+    */
     for (let [k, v] of Object.entries(props)) {
         if ('listeners'===k) {formatListeners(props[k]).forEach(l=>{dom.listen(...l)})}
         else {dom.setAttribute(k, v);}
