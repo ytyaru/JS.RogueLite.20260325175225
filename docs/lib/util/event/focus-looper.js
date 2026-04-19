@@ -14,22 +14,21 @@ class FocusLooper {
         '[tabindex]:not([tabindex^="-"]):not([display="none"]):not(.not-focasable)',
         '*.focusable'
     ];
+    #blacklists = [];
+    addBlacklist(selector) {
+        if (!this.#blacklists.includes(selector)) {
+            this.#blacklists.push(selector);
+            this.refresh();
+        }
+    }
+    removeBlacklist(selector) {
+        this.#blacklists = this.#blacklists.filter(s => s !== selector);
+        this.refresh();
+    }
     constructor() {
         window.addEventListener('DOMContentLoaded', (event) => {
-            this._i = 0; // index(フォーカス対象要素配列内の現在位置)
+            this._i = 0;
             this._els = [...this.itr];
-            /*
-            // DOM更新されたらフォーカス要素とインデックスを更新する
-            const observer = new MutationObserver(records=>{this._els = this.#els; this._i = this.#i;});
-            console.log(document.body);
-            observer.observe(document.body, {
-                subtree: true,
-                childList: true,
-                attributes: true,
-                attributeOldValue: true,
-                attributeFilter: 'href disabled type aria-hidden style display class tabindex contenteditable'.split(' '),
-            });
-            */
             // DOMの変化を監視してリストを更新
             const observer = new MutationObserver(() => this.refresh());
             observer.observe(document.body, {
@@ -43,15 +42,25 @@ class FocusLooper {
             window.addEventListener('scroll', (e)=>this.scrollAutoFocus());
             this.i = 0;
             this._el = document.activeElement;
+
+            this.#setup();
+        });
+    }
+    #setup() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault(); // ブラウザ標準のTab移動を完全に殺す
+                this.move(e.shiftKey ? -1 : 1);
+            }
         });
     }
     // 有効な（表示されている）要素だけを抽出
     refresh() {
         const all = Array.from(document.querySelectorAll(this.#FOCUSABLE_ELEMENTS));
         this._els = all.filter(el => {
-            // 1. offsetParent が null でない（物理的に表示されている）
-            // 2. 自分自身または親要素に .is-hidden がついていない
-            return el.offsetParent !== null && !el.closest('.is-hidden');
+            if (el.offsetParent === null) return false;
+            if (this.#blacklists.some(selector => el.closest(selector))) return false;
+            return true;
         });
     }
     scrollAutoFocus() {//スクロール時にactiveElementが画面外にあり、かつフォーカス対象要素が画面内にあるならそこにフォーカスする
@@ -83,28 +92,7 @@ class FocusLooper {
         els[this._i]?.focus();
         console.log(`i:`, this.i)
     }
-    /*
-    setup() {
-        window.addEventListener('keydown', async(e) => {
-            //if ('Tab'===e.code) {this.keydown(e)}
-//            this.keydown(e);
-        })
-        this.i=0;
-    }
-    */
-    setup() {
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault(); // ブラウザ標準のTab移動を完全に殺す
-                this.move(e.shiftKey ? -1 : 1);
-            }
-        });
-    }
-    setFirst() {
-        this.refresh();
-        this._i = 0;
-        if (this._els[0]) this._els[0].focus();
-    }
+    setFirst() {this.refresh(); this._i = 0;}
     move(dir) {
         if (this._els.length === 0) return;
         this._i = (this._i + dir + this._els.length) % this._els.length;
@@ -112,27 +100,9 @@ class FocusLooper {
     }
     reset() {this.i=0;}
     setFirst() {this.i=0;}
-    setLast() {this.i=this.els.length-1}
+    setLast() {this.i=-1;}
     next() {this.i++}
     prev() {this.i--}
-    /*
-    keydown(e) {
-        if ('Tab'!==e.code){return}
-        const els = this.els;
-        const l = els.length;
-        if (l === 0) { console.log('l === 0');return }
-        if (!document.contains(document.activeElement)) { console.log('contains!!!!!!!');this.i=0; }
-        else {
-            const i = this.#i;
-                 if ( e.shiftKey && i===0) {this.i = l-1; console.log('S:', this.i); e.preventDefault();}
-            else if (!e.shiftKey && 0<l && l-1===i){this.i=0; console.log('!S:',this.i); e.preventDefault();}
-            else if (!e.shiftKey && 0<l && this._i < this.l) {this._i++}
-            else if ( e.shiftKey && 0<this._i) {this._i--}
-            console.log(`i:`, this.i, i)
-        }
-        
-    }
-    */
 }
 window.FocusLooper = new FocusLooper()
 })()
