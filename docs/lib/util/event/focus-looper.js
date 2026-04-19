@@ -18,6 +18,7 @@ class FocusLooper {
         window.addEventListener('DOMContentLoaded', (event) => {
             this._i = 0; // index(フォーカス対象要素配列内の現在位置)
             this._els = [...this.itr];
+            /*
             // DOM更新されたらフォーカス要素とインデックスを更新する
             const observer = new MutationObserver(records=>{this._els = this.#els; this._i = this.#i;});
             console.log(document.body);
@@ -28,11 +29,29 @@ class FocusLooper {
                 attributeOldValue: true,
                 attributeFilter: 'href disabled type aria-hidden style display class tabindex contenteditable'.split(' '),
             });
+            */
+            // DOMの変化を監視してリストを更新
+            const observer = new MutationObserver(() => this.refresh());
+            observer.observe(document.body, {
+                childList: true, subtree: true, attributes: true,
+                attributeFilter: ['class', 'style', 'disabled', 'hidden']
+            });
+            this.refresh();
+
             this._scrollAxis = {x:0, y:0}
             // スクロール時、activeElementが画面外かつフォーカス対象が画面内なら、その要素にfocus()したい
             window.addEventListener('scroll', (e)=>this.scrollAutoFocus());
             this.i = 0;
             this._el = document.activeElement;
+        });
+    }
+    // 有効な（表示されている）要素だけを抽出
+    refresh() {
+        const all = Array.from(document.querySelectorAll(this.#FOCUSABLE_ELEMENTS));
+        this._els = all.filter(el => {
+            // 1. offsetParent が null でない（物理的に表示されている）
+            // 2. 自分自身または親要素に .is-hidden がついていない
+            return el.offsetParent !== null && !el.closest('.is-hidden');
         });
     }
     scrollAutoFocus() {//スクロール時にactiveElementが画面外にあり、かつフォーカス対象要素が画面内にあるならそこにフォーカスする
@@ -64,18 +83,39 @@ class FocusLooper {
         els[this._i]?.focus();
         console.log(`i:`, this.i)
     }
+    /*
     setup() {
         window.addEventListener('keydown', async(e) => {
             //if ('Tab'===e.code) {this.keydown(e)}
-            this.keydown(e);
+//            this.keydown(e);
         })
         this.i=0;
+    }
+    */
+    setup() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault(); // ブラウザ標準のTab移動を完全に殺す
+                this.move(e.shiftKey ? -1 : 1);
+            }
+        });
+    }
+    setFirst() {
+        this.refresh();
+        this._i = 0;
+        if (this._els[0]) this._els[0].focus();
+    }
+    move(dir) {
+        if (this._els.length === 0) return;
+        this._i = (this._i + dir + this._els.length) % this._els.length;
+        this._els[this._i].focus();
     }
     reset() {this.i=0;}
     setFirst() {this.i=0;}
     setLast() {this.i=this.els.length-1}
     next() {this.i++}
     prev() {this.i--}
+    /*
     keydown(e) {
         if ('Tab'!==e.code){return}
         const els = this.els;
@@ -92,6 +132,7 @@ class FocusLooper {
         }
         
     }
+    */
 }
 window.FocusLooper = new FocusLooper()
 })()
