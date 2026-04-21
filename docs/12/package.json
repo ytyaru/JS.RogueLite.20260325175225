@@ -1,0 +1,16 @@
+{
+  "name": "js-rogue-lite-2026",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "bun build.js",
+    "test": "bun test",
+    "dev": "bun build.js --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.28.6",
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "bun-types": "latest"
+  }
+}
