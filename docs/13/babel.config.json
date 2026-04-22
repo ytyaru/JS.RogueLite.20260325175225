@@ -1,0 +1,9 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "modules": false,
+      "targets": "defaults, last 10 years"
+    }]
+  ]
+}
+
