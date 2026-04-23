@@ -1,3 +1,46 @@
+import { InitSceneElement } from './scene/init.js';
+import { BattleSceneElement } from './scene/battle/battle.js';
+import { FinishedSceneElement } from './scene/finished.js';
+import { focusLooper } from './lib/utils/event/focus-looper.js';
+
+export class Game extends HTMLElement {
+    constructor() {
+        super();
+        const scenes = {
+            init: InitSceneElement,
+            battle: BattleSceneElement,
+            finished: FinishedSceneElement
+        };
+        
+        this._ = {
+            events: Object.keys(scenes).reduce((o, n) => {
+                o[n] = new CustomEvent(n);
+                return o;
+            }, {}),
+            scenes: {}
+        };
+
+        // シーンのインスタンス化
+        this._.scenes.init = new scenes.init(() => this.dispatchEvent(this._.events.battle));
+        this._.scenes.battle = new scenes.battle(() => this.dispatchEvent(this._.events.finished));
+        this._.scenes.finished = new scenes.finished(() => this.dispatchEvent(this._.events.init));
+
+        this.append(...Object.values(this._.scenes));
+
+        Object.keys(scenes).forEach(name => {
+            this.addEventListener(name, () => {
+                Object.values(this._.scenes).forEach(s => s.hide());
+                this._.scenes[name].show();
+                setTimeout(() => focusLooper.setFirst(), 10);
+            });
+        });
+
+        this.dispatchEvent(this._.events.init);
+    }
+}
+customElements.define("rogue-lite-game", Game);
+
+/*
 class Game extends HTMLElement {
     constructor() {
         super();
@@ -51,3 +94,4 @@ class Game extends HTMLElement {
     }
 }
 customElements.define("rogue-lite-game", Game);
+*/
