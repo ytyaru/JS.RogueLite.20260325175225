@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
     focusLooper.addBlacklist('.is-hidden');
     document.body.appendChild(new Game());
 });
+
 /*
 window.addEventListener('DOMContentLoaded', (event) => {
     console.log('DOMContentLoaded!!');

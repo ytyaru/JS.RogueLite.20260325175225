@@ -1,0 +1,19 @@
+{
+  "name": "js-rogue-lite-2026",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "build": "bun build/build.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "core-js": "^3.36.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/cli": "^7.23.9",
+    "@babel/preset-env": "^7.24.0",
+    "bun-types": "latest"
+  }
+}
