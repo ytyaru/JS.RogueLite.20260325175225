@@ -3,33 +3,40 @@ class Battler {
         this.name = name;
         this.maxLife = life;
         this.life = life;
-        this.comboCount = 0; // 「斬る」の累積数
-        this.lastCardId = null; // 直前に選択した札ID
+        // 履歴管理
+        this.currentTurnStats = { damageTaken: 0, damageDealt: 0 };
+        this.lastTurnStats = { damageTaken: 0, damageDealt: 0 };
     }
 
     get isDead() { return this.life <= 0; }
 
-    // 現在ライフを減らす
+    // 行動を実行する（共通）
+    act(card, context) {
+        if (!card) return null;
+        console.log(`[${this.name} Action] ${card.name} を実行`);
+        return card.execute(context);
+    }
+
+    // NPC用の思考ルーチン（将来ここを賢くする）
+    decideAction(availableCards) {
+        // 自動カードを除外してランダムに選ぶ
+        const manualCards = availableCards.filter(c => !c.isAuto);
+        return manualCards[Math.floor(Math.random() * manualCards.length)];
+    }
+
     receiveDamage(amount) {
         this.life = Math.max(0, this.life - amount);
+        this.currentTurnStats.damageTaken += amount;
     }
 
-    // 最大ライフを減らす（下限1）
-    reduceMaxHp(amount) {
-        this.maxLife = Math.max(1, this.maxLife - amount);
-        // 現在ライフが最大ライフを超えたら押し下げる
-        if (this.life > this.maxLife) {
-            this.life = this.maxLife;
-        }
-    }
-
-    // 回復（最大ライフまで）
     heal(amount) {
         this.life = Math.min(this.maxLife, this.life + amount);
     }
 
-    // ターン終了時の処理
+    // ターン終了時に統計を更新
     endTurn() {
-        // 今回はターンを跨ぐ状態異常がないため空だが、拡張用に残す
+        this.lastTurnStats = { ...this.currentTurnStats };
+        this.currentTurnStats = { damageTaken: 0, damageDealt: 0 };
     }
 }
+
