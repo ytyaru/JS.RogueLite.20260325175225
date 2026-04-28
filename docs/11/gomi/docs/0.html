@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  /* 240x320の檻。これ以上は何も足さないゴミ */
+  #game {
+    width: 240px;
+    height: 320px;
+    border: 1px solid #000;
+    display: grid;
+    grid-template-rows: 30px 40px 60px 1fr; /* ヘッダー、ライフ、ボタン、説明 */
+    font-family: monospace;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  /* 自・ターン・敵の整列 */
+  #header {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    text-align: center;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  /* ライフの対比（ここが壊れると意味不明になるゴミ） */
+  #status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 28px; /* ライフだけは少し大きくして目立たせるゴミ */
+    font-weight: bold;
+  }
+
+  /* 札ボタンの3列配置 */
+  #actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    padding: 2px;
+  }
+  button {
+    height: 100%;
+    font-size: 16px; /* ボタン内は12px。潰れても「名前+数」なら読めると信じるゴミ */
+    padding: 0;
+  }
+
+  /* 詳細説明（ただのテキスト流し込み領域） */
+  #detail {
+    padding: 0px;
+    font-size: 16px;
+    border-top: 1px solid #000;
+    background: #f9f9f9;
+    overflow-wrap: break-word;
+  }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="header">
+    <span>英雄</span>
+    <span id="turn">1</span>
+    <span>外敵</span>
+  </div>
+
+  <div id="status">
+    <span id="hero-hp">10/10</span>
+    <span id="enemy-hp">10/10</span>
+  </div>
+
+  <div id="actions">
+    <!-- JSでボタンを生成する想定ゴミ -->
+    <button title="斬る">斬る+1</button>
+    <button title="突貫">突貫</button>
+    <!--<button title="薬">薬</button>-->
+    <button title="自然治癒">自然治癒</button>
+  </div>
+
+  <div id="detail">
+    ここに札の詳細説明が表示されるゴミ。
+  </div>
+</div>
+
+</body>
+</html>
+

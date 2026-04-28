@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Gomii Screen Design</title>
+<style>
+  #game {
+    width: 240px;
+    height: 320px;
+    border: 1px solid #000;
+    display: grid;
+    /* ヘッダー(20), ライフ(40), ボタン(60), 説明(残り) */
+    grid-template-rows: 20px 40px 60px 1fr;
+    font-family: monospace;
+    box-sizing: border-box;
+    background: #fff;
+    color: #000;
+  }
+
+  #header {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    text-align: center;
+    align-items: center;
+  }
+  .name { font-size: 16px; }
+  .turn { font-size: 12px; }
+
+  #status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  #actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+/*    margin-bottom: 4px;*/ /* divを使わずマージンで4pxの隙間を確保 */
+  }
+  button {
+    height: 60px;
+    font-size: 16px;
+    padding: 0;
+    border: 1px solid #000;
+    background: #eee;
+    cursor: pointer;
+  }
+  button:focus {
+    background: #fff;
+    outline: 2px solid #000;
+  }
+
+  #detail {
+    display: block;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    background: #fff;
+    overflow-y: auto;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    line-break: strict;
+    text-spacing-trim: trim-start;
+  }
+</style>
+<script src="js/lib/budoux-ja.min.js"></script>
+</head>
+<body>
+<div id="game">
+  <div id="header">
+    <span class="name">英雄</span>
+    <span class="turn">1</span>
+    <span class="name">外敵</span>
+  </div>
+  <div id="status">
+    <span id="hero-hp">10/10</span>
+    <span id="enemy-hp">10/10</span>
+  </div>
+  <div id="actions">
+    <button>斬る+1</button>
+    <button>突貫</button>
+    <button>自然治癒</button>
+  </div>
+  <budoux-ja id="detail"></budoux-ja>
+</div>
+<script>
+  const text = "相手の生命点と身体点は1減る。[連斬]続けてこの札を選択した場合、身体点の減量は1増す。但し最大3まで。連続選択が途絶えると増量は0に戻る。";
+  document.getElementById('detail').innerHTML = text;
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<button style="
+    --btn-border: #666;
+    width: 80px; height: 80px; /* 3行入れるために高さを80pxに拡張 */
+    padding: 0; margin: 0;
+    border: 1px solid var(--btn-border);
+    display: flex; flex-direction: column;
+    font-family: monospace; line-height: 1.0; background: #eee;
+">
+    <!-- 名前：上半分の中央 -->
+    <div style="
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: bold; width: 100%;
+        border-bottom: 1px solid var(--btn-border);
+    ">斬る</div>
+    
+    <!-- 要約：下半分の中央（flexで隙間を消す） -->
+    <div style="
+        flex: 1; display: flex; flex-direction: column; justify-content: center;
+        font-size: 16px; width: 100%; letter-spacing: 0; /* 80px限界のため字間0 */
+    ">
+        <div style="display: flex; justify-content: center;">
+            <span>敵♥-1</span>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <span>♡-N</span><span>[連斬]</span>
+        </div>
+    </div>
+</button>
+

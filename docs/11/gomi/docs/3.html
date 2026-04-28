@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  #game {
+    width: 240px;
+    height: 320px;
+    border: 1px solid #000;
+    display: grid;
+    /* ヘッダー(20), ライフ(40), ボタン(60), 隙間(4), 説明(残り) */
+    grid-template-rows: 20px 40px 60px 4px 1fr;
+    font-family: monospace;
+    box-sizing: border-box;
+    background: #fff;
+    color: #000;
+  }
+
+  #header {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 16px; /* 20px高に合わせて少し縮小ゴミ */
+  }
+
+  #status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  #actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  button {
+    height: 60px;
+    font-size: 16px;
+    padding: 0;
+    border: 1px solid #000;
+    background: #eee;
+    cursor: pointer;
+  }
+  button:focus {
+    background: #fff;
+    outline: 2px solid #000;
+  }
+
+  /* 詳細説明：スクロール対応 ＆ 読みやすさ重視 */
+  #detail {
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    background: #fff;
+    /* 長い時だけスクロールバーを出すゴミ */
+    overflow-y: auto;
+    /* BudouXが挿入する <wbr> を有効にするための設定ゴミ */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+</style>
+<!-- ローカルに保存したBudouXを読み込むゴミ -->
+<script src="js/lib/budoux-ja.min.js"></script>
+</head>
+<body>
+
+<div id="game">
+  <div id="header">
+    <span>英雄</span>
+    <span id="turn">1</span>
+    <span>外敵</span>
+  </div>
+
+  <div id="status">
+    <span id="hero-hp">10/10</span>
+    <span id="enemy-hp">10/10</span>
+  </div>
+
+  <div id="actions">
+    <button>斬る+1</button>
+    <button>突貫</button>
+    <button>薬</button>
+  </div>
+
+  <div></div>
+
+  <div id="detail">
+    <!-- ここにBudouXで処理されたテキストが入るゴミ -->
+  </div>
+  <budoux-ja id="detail"></budoux-ja>
+</div>
+
+<script>
+/*
+  const parser = loadDefaultJapaneseParser();
+  console.log(parser.parse('今日は天気です。')); // ['今日は', '天気です。']
+  // BudouXの使用例（Classic Script形式）
+  const parser = BudouX.loadDefaultJapaneseParser();
+  const text = "相手の生命点と身体点は1減る。[連斬]続けてこの札を選択した場合、身体点の減量は1増す。但し最大3まで。連続選択が途絶えると増量は0に戻る。";
+  
+  // 文節の間に <wbr> を挟んだHTML文字列を生成して流し込むゴミ
+  document.getElementById('detail').innerHTML = parser.translateHTMLString(text);
+  */
+  const text = "相手の生命点と身体点は1減る。[連斬]続けてこの札を選択した場合、身体点の減量は1増す。但し最大3まで。連続選択が途絶えると増量は0に戻る。";
+  document.getElementById('detail').innerHTML = text;
+</script>
+
+</body>
+</html>

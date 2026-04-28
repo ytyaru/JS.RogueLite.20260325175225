@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  /* 240x320の檻。装飾を削ぎ落とした最終形態ゴミ */
+  #game {
+    width: 240px;
+    height: 320px;
+    border: 1px solid #000;
+    display: grid;
+    /* ヘッダー(30), ライフ(40), ボタン(80), 説明(残り) */
+    grid-template-rows: 30px 40px 80px 1fr;
+    font-family: monospace;
+    box-sizing: border-box;
+    background: #fff;
+  }
+
+  /* ヘッダー：名前とターン */
+  #header {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 16px;
+  }
+
+  /* ライフ：28pxの巨大表示（境界線なし） */
+  #status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  /* 札ボタン：16px、改行あり、余白ゼロ */
+  #actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    padding: 0;
+  }
+  button {
+    height: 100%;
+    font-size: 16px;
+    padding: 0;
+    border: 1px solid #000;
+    background: #eee;
+    line-height: 1.1;
+  }
+
+  /* 詳細説明：16px、paddingゼロ、境界線なし */
+  #detail {
+    font-size: 16px;
+    background: #fff;
+    overflow-wrap: break-word;
+    line-height: 1.2;
+  }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="header">
+    <span>英雄</span>
+    <span id="turn">1</span>
+    <span>外敵</span>
+  </div>
+
+  <div id="status">
+    <span id="hero-hp">10/10</span>
+    <span id="enemy-hp">10/10</span>
+  </div>
+
+  <div id="actions">
+    <!-- 要約に「相」を使い、<br>で分断するゴミ -->
+    <button>斬る<br>相命-1</button>
+    <button>突貫<br>相命-3</button>
+    <button>自然治癒<br>自命+1</button>
+  </div>
+
+  <div id="detail">
+    ここに札の詳細説明が表示されるゴミ。16pxなら漢字も読めるゴミ。
+  </div>
+</div>
+
+</body>
+</html>
+

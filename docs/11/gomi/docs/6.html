@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  /* 240x320の檻 */
+  #game {
+    width: 240px; height: 320px; border: 1px solid #000;
+    display: grid;
+    grid-template-rows: 20px 40px 60px 4px 1fr;
+    font-family: monospace; box-sizing: border-box;
+    background: #fff; color: #000;
+  }
+
+  /* ヘッダー：16px死守 */
+  #header {
+    display: grid; grid-template-columns: 1fr 40px 1fr;
+    text-align: center; align-items: center; font-size: 16px;
+  }
+
+  /* ライフ：28px */
+  #status {
+    display: grid; grid-template-columns: 1fr 1fr;
+    text-align: center; align-items: center; font-size: 28px; font-weight: bold;
+  }
+
+  /* 札ボタン：16px */
+  #actions { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  button {
+    height: 60px; font-size: 16px; padding: 0;
+    border: 1px solid #000; background: #eee; cursor: pointer;
+  }
+  button:focus { background: #fff; outline: 2px solid #000; }
+
+  /* 詳細説明：BudouX + 禁則処理 */
+  #detail {
+    display: block; font-size: 16px; line-height: 1.5; letter-spacing: 0.05em;
+    background: #fff; overflow-y: auto;
+    
+    /* BudouXの改行ポイントを強制する設定ゴミ */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+
+    /* 句読点を行頭に置かない（Firefoxでも有効） */
+    line-break: strict;
+
+    /* --- 以下、理想のコード（2026/04/28時点ではFirefox未対応） --- */
+    /* Chrome等では句読点が半角化して前行末尾に追い込まれるゴミ */
+    /* text-spacing-trim: trim-end; */
+  }
+</style>
+<script src="js/lib/budoux-ja.min.js"></script>
+</head>
+<body>
+<div id="game">
+  <div id="header"><span>英雄</span><span id="turn">1</span><span>外敵</span></div>
+  <div id="status"><span id="hero-hp">10/10</span><span id="enemy-hp">10/10</span></div>
+  <div id="actions"><button>斬る+1</button><button>突貫</button><button>薬</button></div>
+  <div></div>
+  <budoux-ja id="detail"></budoux-ja>
+</div>
+<script>
+  const text = "相手の生命点と身体点は1減る。[連斬]続けてこの札を選択した場合、身体点の減量は1増す。但し最大3まで。連続選択が途絶えると増量は0に戻る。";
+  document.getElementById('detail').innerHTML = text;
+</script>
+</body>
+</html>
