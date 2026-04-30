@@ -1,0 +1,34 @@
+src
+    index.html
+    css
+        scene.css
+    js
+        main.js
+        game.js
+        lib
+            budoux-ja.min.js
+            budoux-parser-exporter.js
+        utils
+            type.js
+            event
+                listener.js
+                focus-looper.js
+            dom
+                dom.tags.js
+        scene
+            scene.js
+            init.js
+            battle
+                battle.js
+                input
+                    input-manager.js
+                ui
+                    status-view.js
+                    hand-view.js
+                model
+                    battler.js
+                    player-battler.js
+                    computer-battler.js
+                    deck.js
+                    card.js
+

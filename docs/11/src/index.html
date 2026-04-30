@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>Gomii</title>
+    <link rel="stylesheet" href="css/scene.css">
+    
+    <!-- 1. 外部ライブラリ (最優先) -->
+    <script src="js/lib/budoux-ja.min.js"></script>
+    <script src="js/lib/budoux-parser-exporter.js"></script>
+
+    <!-- 2. 自家製内部ライブラリ (Utils) -->
+    <script src="js/lib/utils/type.js"></script>
+    <script src="js/lib/utils/event/listener.js"></script>
+    <script src="js/lib/utils/dom/dom.tags.js"></script>
+    <script src="js/lib/utils/event/focus-looper.js"></script>
+    
+    <!-- 3. シーン基底クラス -->
+    <script src="js/scene/scene.js"></script>
+    
+    <!-- 4. ゲームモデル (データとロジック) -->
+    <script src="js/scene/battle/model/battler.js"></script>
+    <script src="js/scene/battle/model/player-battler.js"></script>
+    <script src="js/scene/battle/model/computer-battler.js"></script>
+    <script src="js/scene/battle/model/deck.js"></script>
+    <script src="js/scene/battle/model/card.js"></script>
+    
+    <!-- 5. UI表示と入力管理 -->
+    <script src="js/scene/battle/ui/status-view.js"></script>
+    <script src="js/scene/battle/ui/hand-view.js"></script>
+    <script src="js/scene/battle/input/input-manager.js"></script>
+    
+    <!-- 6. 各シーンの実装 -->
+    <script src="js/scene/init.js"></script>
+    <script src="js/scene/battle/battle.js"></script>
+    
+    <!-- 7. コアロジック (エントリーポイント) -->
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body>
+    <!-- ゲーム画面は main.js によって生成・追加されるゴミ -->
+</body>
+</html>

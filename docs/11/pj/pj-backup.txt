@@ -1,0 +1,58 @@
+install.sh      +x
+package.json
+test
+    test.sh     +x
+build
+    build.sh    +x
+    build.js
+    babel.config.json
+docs
+    system-architecture.md
+    requirements-definition.md
+    proposal.md
+    policy.md
+    glossary.md
+    game-mechanics.md
+    action-specs.md
+dist
+    ie11    # 結局 ie11/es5 どっちにすべきか未定
+        bundle.js
+        style.css
+        index.html
+    ff142   # これも開発用コードとかにすべきかもしれない。どう名付けるべきか未定
+        bundle.js
+        style.css
+        index.html
+src
+    index.html    
+    css
+        scene.css
+    js
+        scene
+            scene.js
+            init.js
+            finished.js
+            battle
+                battle.js
+                ui
+                    status-view.js
+                    hand-view.js
+                model
+                    player-battler.js
+                    deck.js
+                    computer-battler.js
+                    card.js
+                    battler.js
+                input
+                    input-manager.js
+        lib
+            utils
+                dom
+                    dom.tags.js
+                event
+                    listener.js
+                    focus-looper.js
+                type.js
+        main.js
+        game.js
+

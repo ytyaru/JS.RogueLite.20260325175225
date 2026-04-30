@@ -76,7 +76,7 @@
 
 | 札名 | 全文説明 (日本語) | Full Description (English) |
 | :--- | :--- | :--- |
-| **斬る** | 相手の生命点と身体点を1減らす。もしこの札を続けて選択したなら、身体点の減少量を1増やす(最大2)。さもなくば減少量を0に戻す。 | Decrease 1 Life and 1 Body from the opponent. If this card is selected consecutively, increase the Body decrease amount by 1 (Max 2). Otherwise, the decrease amount resets to 0. |
+| **斬る** | 相手の生命点と身体点を1減らす。もしこの札を続けて選択したなら、身体点の減少量を1増やす(最大2)。さもなくば、減少量を0に戻す。 | Decrease 1 Life and 1 Body from the opponent. If this card is selected consecutively, increase the Body decrease amount by 1 (Max 2). Otherwise, the decrease amount resets to 0. |
 | **突貫** | 相手の生命点を3減らす。自分の生命点を1減らす。 | Decrease 3 Life from the opponent. Decrease 1 Life from yourself. |
 | **薬** | 自分の生命点を3増やす。 | Increase 3 Life for yourself. |
 | **自然治癒** | 自分の生命点を1増やす。この札は選択できず自動発動する。 | Increase 1 Life for yourself. This card cannot be selected and activates automatically. |
