@@ -1,0 +1,19 @@
+<budoux-ja id="detail">今日は天気です。</budoux-ja>
+<script src="https://unpkg.com/budoux/bundle/budoux-ja.min.js"></script>
+<script>
+// <budoux-ja> の中身を監視して、U+200B を <wbr> に変えるゴミ・フィルター
+const observer = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    // テキストが更新されたら発動
+    const el = mutation.target;
+    if (el.innerHTML && el.innerHTML.includes('\u200b')) {
+      // ゼロ幅スペースを <wbr> に置換
+      el.innerHTML = el.innerHTML.replace(/\u200b/g, '<wbr>');
+    }
+  }
+});
+
+// 監視開始
+const detailEl = document.getElementById('detail');
+observer.observe(detailEl, { childList: true, characterData: true, subtree: true });
+</script>

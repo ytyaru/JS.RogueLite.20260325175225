@@ -1,0 +1,61 @@
+<budoux-ja id="detail">今日は天気です。</budoux-ja>
+<script src="https://unpkg.com/budoux/bundle/budoux-ja.min.js"></script>
+<script>
+/**
+ * BudouX-Gomii-Fix
+ * 公式の難解なバンドルから parse() メソッドだけを抽出してグローバルに晒すゴミ。
+ */
+(function() {
+    // 1. 登録済みのカスタム要素のクラスを取得
+    const BudouXElement = customElements.get('budoux-ja');
+    if (!BudouXElement) {
+        console.error("BudouXが読み込まれていないゴミ！");
+        return;
+    }
+
+    // 2. 誰も見ていないところでインスタンスを1つ作る
+    const instance = new BudouXElement();
+
+    // 3. インスタンスの中から「model」プロパティを持つオブジェクト（＝パーサー）を探す
+    // 難読化されていても、この構造は変わらないゴミ
+    const internalParser = Object.values(instance).find(p => p && p.model);
+
+    if (internalParser && typeof internalParser.parse === 'function') {
+        // 4. グローバルに使いやすい形で公開するゴミ
+        window.budoux = {
+            // U+200B を一切含まない、純粋な配列を返す parse
+            parse: (text) => internalParser.parse(text)
+        };
+        console.log("BudouXの強奪に成功したゴミ。budoux.parse() が使えるゴミ。");
+    } else {
+        console.error("パーサーの抽出に失敗したゴミ。Googleが難読化ルールを変えたかもしれないゴミ。");
+    }
+})();
+</script>
+<script>
+// 1. 文節の配列を取得（U+200Bは入っていない）
+const segments = budoux.parse("相手の生命点と身体点は1減る。");
+
+// 2. <wbr> で結合して流し込む
+// これにより、コピーした時はただのテキスト、表示は文節改行になるゴミ
+document.getElementById('detail').innerHTML = segments.join('<wbr>');
+</script>
+<!--
+<script>
+// <budoux-ja> の中身を監視して、U+200B を <wbr> に変えるゴミ・フィルター
+const observer = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    // テキストが更新されたら発動
+    const el = mutation.target;
+    if (el.innerHTML && el.innerHTML.includes('\u200b')) {
+      // ゼロ幅スペースを <wbr> に置換
+      el.innerHTML = el.innerHTML.replace(/\u200b/g, '<wbr>');
+    }
+  }
+});
+
+// 監視開始
+const detailEl = document.getElementById('detail');
+observer.observe(detailEl, { childList: true, characterData: true, subtree: true });
+</script>
+-->
