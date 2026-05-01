@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>Gomii</title>
+    <style>
+        /* 240x320 固定解像度の檻 */
+        #game-container {
+            width: 240px; height: 320px; border: 2px solid #333;
+            position: relative; font-family: monospace; overflow: hidden;
+            background: #fff; user-select: none; display: flex; flex-direction: column;
+        }
+        .header { height: 24px; display: flex; justify-content: space-between; padding: 0 8px; font-size: 14px; border-bottom: 1px solid #eee; align-items: center; }
+        .status-area { height: 48px; display: flex; justify-content: space-around; align-items: center; font-size: 24px; font-weight: bold; background: #f9f9f9; }
+        .log-area { height: 20px; font-size: 12px; text-align: center; color: #d33; }
+        .action-area { height: 64px; display: flex; justify-content: center; gap: 2px; padding: 0 4px; }
+        .card-btn {
+            width: 76px; height: 60px; border: 2px solid #666; background: #eee;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0;
+        }
+        .card-btn:focus { border-color: #000; background: #fff; outline: none; }
+        .card-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .card-name { font-size: 14px; font-weight: bold; }
+        .card-sum { font-size: 10px; }
+        .key-hints { height: 16px; display: flex; justify-content: center; gap: 2px; font-size: 10px; color: #999; }
+        .key-hint { width: 76px; text-align: center; }
+        .detail-area { flex: 1; padding: 4px; font-size: 12px; border-top: 1px solid #333; background: #fff; line-height: 1.2; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <span>英雄</span><span id="turn-count">1</span><span>外敵</span>
+    </div>
+    <div class="status-area">
+        <div id="hero-status">10/10</div>
+        <div id="enemy-status">10/10</div>
+    </div>
+    <div class="log-area" id="log-display"></div>
+    <div class="action-area" id="hand-area"></div>
+    <div class="key-hints">
+        <div class="key-hint">J</div><div class="key-hint">K</div><div class="key-hint">L</div>
+    </div>
+    <div id="detail-text" class="detail-area"></div>
+</div>
+
+<script>
+/**
+ * ゲームメカニクス定数
+ */
+const CARDS = {
+    SLASH: {
+        id: 'SLASH', name: '斬る',
+        getSum: (combo) => `敵♥-1♡-${combo}`,
+        getDetail: (combo) => `相手の生命点を1減らしたあと身体点を${combo}減らす。もしこの札を続けて選択したなら、身体点の減少量を1増やす(最大2)。さもなくば、減少量を0に戻す。`,
+        apply: (actor, target) => {
+            if (actor.lastCardId === 'SLASH') { actor.combo = Math.min(2, actor.combo + 1); } 
+            else { actor.combo = 0; }
+            const reduction = 1 + actor.combo;
+            target.life -= 1;
+            target.body -= reduction;
+            actor.lastCardId = 'SLASH';
+        }
+    },
+    RUSH: {
+        id: 'RUSH', name: '突貫',
+        getSum: () => `敵♥-3自♥-1`,
+        getDetail: () => `相手の生命点を3減らす。自分の生命点を1減らす。`,
+        apply: (actor, target) => {
+            target.life -= 3;
+            actor.life -= 1;
+            actor.combo = 0;
+            actor.lastCardId = 'RUSH';
+        }
+    },
+    MEDICINE: {
+        id: 'MEDICINE', name: '薬',
+        getSum: () => `自♥+3`,
+        getDetail: () => `自分の生命点を3増やす。`,
+        apply: (actor, target) => {
+            actor.life += 3;
+            actor.combo = 0;
+            actor.lastCardId = 'MEDICINE';
+        }
+    },
+    AUTO_HEAL: {
+        id: 'AUTO_HEAL', name: '自然治癒', isAuto: true,
+        getSum: () => `自♥+1[即]`,
+        getDetail: () => `自分の生命点を1増やす。この札は選択できず自動発動する。`,
+        apply: (actor, target) => {
+            actor.life += 1;
+            // 自動発動はコンボをリセットしない
+        }
+    }
+};
+
+/**
+ * 状態管理
+ */
+let state = {
+    turn: 1,
+    hero: { life: 10, body: 10, combo: 0, lastCardId: null },
+    enemy: { life: 10, body: 10, combo: 0, lastCardId: null },
+    hand: [],
+    isGameOver: false
+};
+
+/**
+ * バトラーの属性操作（Setterの代わり）
+ */
+function updateLife(battler, value) {
+    battler.life = Math.max(0, Math.min(battler.body, battler.life + value));
+}
+function updateBody(battler, value) {
+    battler.body = Math.max(1, battler.body + value);
+    if (battler.life > battler.body) battler.life = battler.body;
+}
+
+/**
+ * ターン進行
+ */
+function init() {
+    state = {
+        turn: 1,
+        hero: { life: 10, body: 10, combo: 0, lastCardId: null },
+        enemy: { life: 10, body: 10, combo: 0, lastCardId: null },
+        isGameOver: false
+    };
+    nextTurn();
+}
+
+function nextTurn() {
+    // 4枚中3枚をランダム選出
+    const pool = Object.values(CARDS);
+    state.hand = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+    
+    // 自動発動フェーズ
+    state.hand.forEach(card => {
+        if (card.isAuto) {
+            if (card.id === 'AUTO_HEAL') updateLife(state.hero, 1);
+        }
+    });
+
+    render();
+    checkWinLose();
+}
+
+function runTurn(cardId) {
+    if (state.isGameOver) return;
+
+    // 1. プレイヤーの行動
+    const heroCard = CARDS[cardId];
+    applyCard(heroCard, state.hero, state.enemy);
+    if (checkWinLose()) return;
+
+    // 2. 敵の行動（自動以外からランダム）
+    const enemyPool = Object.values(CARDS).filter(c => !c.isAuto);
+    const enemyCard = enemyPool[Math.floor(Math.random() * enemyPool.length)];
+    applyCard(enemyCard, state.enemy, state.hero);
+    if (checkWinLose()) return;
+
+    state.turn++;
+    nextTurn();
+}
+
+function applyCard(card, actor, target) {
+    // コンボ判定
+    if (card.id === 'SLASH') {
+        if (actor.lastCardId === 'SLASH') actor.combo = Math.min(2, actor.combo + 1);
+        else actor.combo = 1;
+        updateLife(target, -1);
+        updateBody(target, -(actor.combo));
+    } else {
+        actor.combo = 0;
+        if (card.id === 'RUSH') { updateLife(target, -3); updateLife(actor, -1); }
+        if (card.id === 'MEDICINE') { updateLife(actor, 3); }
+    }
+    actor.lastCardId = card.id;
+}
+
+function checkWinLose() {
+    if (state.enemy.life <= 0) return endGame("勝利！");
+    if (state.hero.life <= 0) return endGame("敗北...");
+    return false;
+}
+
+function endGame(msg) {
+    state.isGameOver = true;
+    alert(msg);
+    init();
+    return true;
+}
+
+/**
+ * 描画
+ */
+function render() {
+    document.getElementById('turn-count').innerText = state.turn;
+    document.getElementById('hero-status').innerText = `${state.hero.life}/${state.hero.body}`;
+    document.getElementById('enemy-status').innerText = `${state.enemy.life}/${state.enemy.body}`;
+
+    const handArea = document.getElementById('hand-area');
+    handArea.innerHTML = '';
+    
+    state.hand.forEach((card, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'card-btn';
+        if (card.isAuto) btn.disabled = true;
+
+        const comboVal = (card.id === 'SLASH') ? (state.hero.lastCardId === 'SLASH' ? Math.min(2, state.hero.combo + 1) : 1) : 0;
+        const nextCombo = (card.id === 'SLASH') ? comboVal : 1;
+
+        btn.innerHTML = `<span class="card-name">${card.name}</span><span class="card-sum">${card.getSum(nextCombo)}</span>`;
+        
+        const updateDetail = () => {
+            document.getElementById('detail-text').innerText = card.getDetail(nextCombo);
+        };
+        btn.onmouseover = btn.onfocus = updateDetail;
+        btn.onclick = () => runTurn(card.id);
+        handArea.appendChild(btn);
+    });
+}
+
+// キーボード操作
+window.addEventListener('keyup', (e) => {
+    if (state.isGameOver) return;
+    const idx = { 'j': 0, 'k': 1, 'l': 2 }[e.key.toLowerCase()];
+    if (idx !== undefined && state.hand[idx] && !state.hand[idx].isAuto) {
+        runTurn(state.hand[idx].id);
+    }
+});
+
+init();
+</script>
+</body>
+</html>

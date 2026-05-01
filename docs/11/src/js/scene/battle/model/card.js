@@ -1,92 +1,192 @@
-class Card {
-    constructor(id, name, isAuto = false) {
-        this.id = id;
-        this.name = name;
-        this.isAuto = isAuto;
+(function() {
+    /**
+     * 戦闘の文脈（Context）
+     */
+    class BattleContext {
+        constructor(actor, target, card) {
+            this.actor = actor;
+            this.target = target;
+            this.card = card;
+        }
     }
 
-    // 共通の実行窓口：責任の分配を行うゴミ
-    execute(actor, target) {
-        if (this.isAuto) {
-            // 自動発動札は効果を適用するだけ。コンボの状態を一切汚さないゴミ
-            this.apply(actor, target);
-            return;
+    /**
+     * 1. 発動条件 (Trigger)
+     */
+    class Trigger {
+        get isAuto() { return false; }
+        get canSelect() { return true; }
+    }
+    class NormalTrigger extends Trigger {}
+    class AutoTrigger extends Trigger {
+        get isAuto() { return true; }
+        get canSelect() { return false; }
+    }
+
+    /**
+     * 2. 特性 (Trait)
+     */
+    class Trait {
+        execute(context) {}
+    }
+
+    class ComboTrait extends Trait {
+        #max;
+        #count = 0;
+        constructor(max = 2) {
+            super();
+            this.#max = max;
+        }
+        get count() { return this.#count; }
+        get max() { return this.#max; }
+        
+        execute(context) {
+            if (context.actor.lastCardId === context.card.id) {
+                this.#count = Math.min(this.#max, this.#count + 1);
+            } else {
+                this.#count = 0;
+            }
+        }
+    }
+
+    /**
+     * 3. 実行処理 (Action)
+     */
+    class Action {
+        execute(context, operations, traits) {
+            operations.forEach(op => op.apply(context));
+        }
+    }
+    class NormalAction extends Action {
+        execute(context, operations, traits) {
+            traits.forEach(t => t.execute(context));
+            super.execute(context, operations, traits);
+            context.actor.lastCardId = context.card.id;
+        }
+    }
+    class AutoAction extends Action {}
+
+    /**
+     * 4. 状態操作 (StatusOperation)
+     */
+    class StatusOperation {
+        #targetKey; #attrName; #valueOrFn;
+        constructor(targetKey, attrName, valueOrFn) {
+            this.#targetKey = targetKey;
+            this.#attrName = attrName;
+            this.#valueOrFn = valueOrFn;
+        }
+        apply(context) {
+            const t = (this.#targetKey === 'actor') ? context.actor : context.target;
+            const v = (typeof this.#valueOrFn === 'function') 
+                ? this.#valueOrFn(context) 
+                : this.#valueOrFn;
+            t[this.#attrName] += v;
+        }
+        static makeAll(...args) {
+            return args.map(arg => new StatusOperation(...arg));
+        }
+    }
+
+    /**
+     * 5. 札 (Card)
+     */
+    class Card {
+        #id; #name; #description; #operations; #traits; #trigger; #action;
+        constructor(id, name, description, operations, traits, trigger, action) {
+            this.#id = id;
+            this.#name = name;
+            this.#description = description;
+            this.#operations = operations;
+            this.#traits = traits;
+            this.#trigger = trigger;
+            this.#action = action;
+        }
+        get id() { return this.#id; }
+        get name() { return this.#name; }
+        get description() { return this.#description; }
+        get isAuto() { return this.#trigger.isAuto; }
+        get canSelect() { return this.#trigger.canSelect; }
+
+        /**
+         * 特性の取得
+         * 引数 cls があればその型を、なければ唯一の特性を返すゴミ。
+         */
+        getTrait(cls) {
+            if (cls) {
+                return this.#traits.find(t => t instanceof cls);
+            }
+            // 引数がない場合は、特性が一つだけであることを保証するゴミ
+            if (this.#traits.length !== 1) {
+                throw new Error(`getTrait() without arguments requires exactly 1 trait. (Found: ${this.#traits.length})`);
+            }
+            return this.#traits[0];
         }
 
-        // 選択発動札の共通ロジックゴミ
-        if (actor.lastCardId === this.id) {
-            // 同じ札を連続選択したなら、その札固有の成長処理を呼ぶゴミ
-            this.onCombo(actor);
-        } else {
-            // 違う札を選んだなら、一律でコンボを初期化するゴミ（DRY！）
-            actor.combo = 0;
+        execute(actor, target) {
+            const context = new BattleContext(actor, target, this);
+            this.#action.execute(context, this.#operations, this.#traits);
         }
 
-        this.apply(actor, target);
-        actor.lastCardId = this.id;
+        static makeAll(dataList) {
+            return dataList.map((d, index) => {
+                const trigger = d.trigger || new NormalTrigger();
+                const action = d.action || (trigger instanceof AutoTrigger ? new AutoAction() : new NormalAction());
+                return new Card(
+                    index, d.name, d.desc,
+                    d.operations || [],
+                    d.traits || [],
+                    trigger,
+                    action
+                );
+            });
+        }
     }
 
-    // 札固有の成長ロジック（必要なら上書きするゴミ）
-    onCombo(actor) {}
+    // 札データの定義
+    const CARD_DATA = [
+        {
+            name: '斬る',
+            desc: '相手の生命点と身体点を1減らす。もしこの札を続けて選択したなら、身体点の減少量を1増やす(最大2)。さもなくば、減少量を0に戻す。',
+            operations: StatusOperation.makeAll(
+                ['target', 'life', -1],
+                ['target', 'body', (ctx) => -(1 + ctx.card.getTrait().count)]
+            ),
+            traits: [new ComboTrait(2)]
+        },
+        {
+            name: '突貫',
+            desc: '相手の生命点を3減らす。自分の生命点を1減らす。',
+            operations: StatusOperation.makeAll(
+                ['target', 'life', -3],
+                ['actor', 'life', -1]
+            )
+        },
+        {
+            name: '薬',
+            desc: '自分の生命点を3増やす。',
+            operations: StatusOperation.makeAll(['actor', 'life', 3])
+        },
+        {
+            name: '自然治癒',
+            desc: '自分の生命点を1増やす。この札は選択できず自動発動する。',
+            operations: StatusOperation.makeAll(['actor', 'life', 1]),
+            trigger: new AutoTrigger()
+        }
+    ];
 
-    // 札固有の効果適用（必ず上書きするゴミ）
-    apply(actor, target) { throw new Error("apply() must be implemented"); }
+    /**
+     * 外部公開用のファクトリ
+     */
+    window.CardFactory = {
+        /**
+         * 新しいカードインスタンスの配列を生成して返す
+         */
+        createAll() {
+            return Card.makeAll(CARD_DATA);
+        }
+    };
 
-    // card-text-rule.md に基づく説明文
-    get description() { throw new Error("description must be implemented"); }
-}
 
-class SlashCard extends Card {
-    constructor() { super('SLASH', '斬る'); }
-    get description() {
-        return "相手の生命点と身体点を1減らす。もしこの札を続けて選択したなら、身体点の減少量を1増やす(最大2)。さもなくば、減少量を0に戻す。";
-    }
 
-    // 斬る専用の成長ルール：ここで上限を管理するゴミ
-    onCombo(actor) {
-        actor.combo = Math.min(2, actor.combo + 1);
-    }
-
-    apply(actor, target) {
-        target.life -= 1;
-        target.body -= (1 + actor.combo);
-    }
-}
-
-class RushCard extends Card {
-    constructor() { super('RUSH', '突貫'); }
-    get description() {
-        return "相手の生命点を3減らす。自分の生命点を1減らす。";
-    }
-    apply(actor, target) {
-        target.life -= 3;
-        actor.life -= 1;
-    }
-}
-
-class MedicineCard extends Card {
-    constructor() { super('MEDICINE', '薬'); }
-    get description() {
-        return "自分の生命点を3増やす。";
-    }
-    apply(actor, target) {
-        actor.life += 3;
-    }
-}
-
-class AutoHealCard extends Card {
-    constructor() { super('AUTO_HEAL', '自然治癒', true); }
-    get description() {
-        return "自分の生命点を1増やす。この札は選択できず自動発動する。";
-    }
-    apply(actor, target) {
-        actor.life += 1;
-    }
-}
-
-window.CARD_LIST = [
-    new SlashCard(),
-    new RushCard(),
-    new MedicineCard(),
-    new AutoHealCard()
-];
+})();
