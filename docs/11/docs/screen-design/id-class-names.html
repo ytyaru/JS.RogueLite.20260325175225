@@ -1,0 +1,35 @@
+<div id="game-container">
+  <!-- 1. ヘッダー：名前と進行度 -->
+  <header id="battle-header">
+    <span id="hero-name" class="is-hero">英雄</span>
+    <span id="turn-count" class="val-turn">1</span>
+    <span id="enemy-name" class="is-enemy">外敵</span>
+  </header>
+
+  <!-- 2. ステータス：生命点と身体点の数値 -->
+  <div id="battle-status">
+    <div id="hero-status" class="status-unit is-hero">
+      <span id="hero-life" class="val-life">10</span>
+      <span class="separator">/</span>
+      <span id="hero-body" class="val-body">10</span>
+    </div>
+    <div id="enemy-status" class="status-unit is-enemy">
+      <span id="enemy-life" class="val-life">10</span>
+      <span class="separator">/</span>
+      <span id="enemy-body" class="val-body">10</span>
+    </div>
+  </div>
+
+  <!-- 3. アクション：札ボタン -->
+  <div id="battle-action">
+    <!-- JSで動的に生成・置換されるボタンの例 -->
+    <button class="card-button" type="button">斬る+1</button>
+    <button class="card-button" type="button">突貫</button>
+    <!-- 使用禁止や自動発動は class と disabled で表現 -->
+    <button class="card-button is-disabled" type="button" disabled>自然治癒</button>
+  </div>
+
+  <!-- 4. ディテール：BudouXによる説明文 -->
+  <budoux-ja id="battle-detail"></budoux-ja>
+</div>
+

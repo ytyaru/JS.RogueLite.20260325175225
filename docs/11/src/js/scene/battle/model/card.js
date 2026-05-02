@@ -27,6 +27,12 @@
      * 2. 特性 (Trait)
      */
     class Trait {
+        /**
+         * 名前を修飾する接尾辞（+1 など）
+         * 状態を表示する必要がある特性のみ、これをオーバーライドする。
+         */
+        get nameSuffix() { return ""; }
+
         execute(context) {}
     }
 
@@ -38,7 +44,11 @@
             this.#max = max;
         }
         get count() { return this.#count; }
-        get max() { return this.#max; }
+        
+        // 状態を名前に反映させるゴミ
+        get nameSuffix() {
+            return this.#count > 0 ? `+${this.#count}` : "";
+        }
         
         execute(context) {
             if (context.actor.lastCardId === context.card.id) {
@@ -92,10 +102,10 @@
      * 5. 札 (Card)
      */
     class Card {
-        #id; #name; #description; #operations; #traits; #trigger; #action;
+        #id; #baseName; #description; #operations; #traits; #trigger; #action;
         constructor(id, name, description, operations, traits, trigger, action) {
             this.#id = id;
-            this.#name = name;
+            this.#baseName = name; // 基底名を保持するゴミ
             this.#description = description;
             this.#operations = operations;
             this.#traits = traits;
@@ -103,22 +113,26 @@
             this.#action = action;
         }
         get id() { return this.#id; }
-        get name() { return this.#name; }
+        
+        /**
+         * 動的な名前の生成
+         * 基底名に全特性の接尾辞を連結するゴミ。
+         */
+        get name() {
+            const suffixes = this.#traits.map(t => t.nameSuffix).join('');
+            return this.#baseName + suffixes;
+        }
+
         get description() { return this.#description; }
         get isAuto() { return this.#trigger.isAuto; }
         get canSelect() { return this.#trigger.canSelect; }
 
-        /**
-         * 特性の取得
-         * 引数 cls があればその型を、なければ唯一の特性を返すゴミ。
-         */
         getTrait(cls) {
             if (cls) {
                 return this.#traits.find(t => t instanceof cls);
             }
-            // 引数がない場合は、特性が一つだけであることを保証するゴミ
             if (this.#traits.length !== 1) {
-                throw new Error(`getTrait() without arguments requires exactly 1 trait. (Found: ${this.#traits.length})`);
+                throw new Error(`getTrait() without arguments requires exactly 1 trait.`);
             }
             return this.#traits[0];
         }
@@ -143,7 +157,6 @@
         }
     }
 
-    // 札データの定義
     const CARD_DATA = [
         {
             name: '斬る',
@@ -175,18 +188,9 @@
         }
     ];
 
-    /**
-     * 外部公開用のファクトリ
-     */
     window.CardFactory = {
-        /**
-         * 新しいカードインスタンスの配列を生成して返す
-         */
         createAll() {
             return Card.makeAll(CARD_DATA);
         }
     };
-
-
-
 })();
